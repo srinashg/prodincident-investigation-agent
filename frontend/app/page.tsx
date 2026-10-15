@@ -96,38 +96,93 @@ export default function Home() {
   return (
     <main className="container">
       <header>
-        <p className="eyebrow">Local MVP</p>
         <h1>Production Incident Investigation Console</h1>
         <p className="intro">
-          Investigate the checkout service using local telemetry, recent changes, and a troubleshooting runbook.
+          Describe a production symptom, then let the investigator collect telemetry,
+          recent changes, and troubleshooting guidance to identify a likely cause.
         </p>
       </header>
 
+      <section className="card guideCard" aria-labelledby="how-to-use">
+        <h2 id="how-to-use">What you do here</h2>
+        <div className="steps">
+          <div className="step">
+            <span className="stepNumber">1</span>
+            <div>
+              <strong>Describe the symptom</strong>
+              <p>Enter what you are observing, such as checkout requests taking about 4 seconds.</p>
+            </div>
+          </div>
+          <div className="step">
+            <span className="stepNumber">2</span>
+            <div>
+              <strong>Run the investigation</strong>
+              <p>The system checks the available telemetry, recent changes, and troubleshooting knowledge.</p>
+            </div>
+          </div>
+          <div className="step">
+            <span className="stepNumber">3</span>
+            <div>
+              <strong>Review the diagnosis</strong>
+              <p>Use the evidence, likely cause, confidence, and next checks to understand what may have failed.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section className="card">
         <h2>Start an investigation</h2>
+        <p className="sectionHelp">
+          Enter the incident symptom below. Use <strong>Investigate current telemetry</strong> when
+          you want to analyze whatever data is already in the simulator.
+        </p>
+
         <form onSubmit={submitInvestigation}>
-          <label htmlFor="symptom">Incident symptom</label>
+          <label htmlFor="symptom">What problem are you seeing?</label>
           <textarea
             id="symptom"
             value={symptom}
             onChange={(event) => setSymptom(event.target.value)}
             rows={3}
+            placeholder="Example: Checkout requests are taking about 4 seconds"
           />
-          <div className="actions">
-            <button disabled={loading} type="submit">
-              {loading ? "Working..." : "Investigate current telemetry"}
-            </button>
-            <button disabled={loading} type="button" className="secondary" onClick={evaluateKnownScenario}>
-              Evaluate known high-latency scenario
-            </button>
+
+          <div className="actionGrid">
+            <div className="actionOption">
+              <button disabled={loading} type="submit">
+                {loading ? "Working..." : "Investigate current telemetry"}
+              </button>
+              <p>
+                Analyze the telemetry and changes that currently exist in the checkout simulator.
+              </p>
+            </div>
+
+            <div className="actionOption">
+              <button
+                disabled={loading}
+                type="button"
+                className="secondary"
+                onClick={evaluateKnownScenario}
+              >
+                Evaluate known high-latency scenario
+              </button>
+              <p>
+                Load the built-in ~4 second latency incident, run the investigation, and verify
+                whether the expected cause and evidence are found.
+              </p>
+            </div>
           </div>
         </form>
+
         {error && <p className="error">{error}</p>}
       </section>
 
       {evaluation && (
         <section className="card">
           <h2>Evaluation</h2>
+          <p className="sectionHelp">
+            This checks the investigation against the known answer for the built-in test scenario.
+          </p>
           <div className="metricGrid">
             <div><strong>{evaluation.passed ? "PASS" : "FAIL"}</strong><span>Overall</span></div>
             <div><strong>{Math.round(evaluation.score * 100)}%</strong><span>Score</span></div>
