@@ -1,5 +1,3 @@
-# prodincident-investigation-agent
-
 # AI Production Incident Investigator
 
 An AI agent that investigates simulated production incidents in a checkout/order API.
