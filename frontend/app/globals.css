@@ -15,11 +15,11 @@ button, textarea { font: inherit; }
 }
 
 header { margin-bottom: 28px; }
-h1 { font-size: clamp(2rem, 5vw, 3.25rem); margin: 8px 0 12px; }
+h1 { font-size: clamp(2rem, 5vw, 3.25rem); margin: 0 0 12px; }
 h2 { margin-top: 0; }
 h3 { margin-top: 28px; }
-.intro { max-width: 700px; line-height: 1.6; color: #4a5865; }
-.eyebrow { text-transform: uppercase; letter-spacing: .12em; font-weight: 700; font-size: .8rem; }
+.intro { max-width: 760px; line-height: 1.6; color: #4a5865; }
+.sectionHelp { color: #4a5865; line-height: 1.55; margin-top: -4px; }
 
 .card {
   background: white;
@@ -30,7 +30,45 @@ h3 { margin-top: 28px; }
   box-shadow: 0 8px 24px rgba(20, 32, 44, 0.06);
 }
 
-label { display: block; font-weight: 700; margin-bottom: 8px; }
+.guideCard {
+  background: #f9fbfc;
+}
+
+.steps {
+  display: grid;
+  gap: 18px;
+}
+
+.step {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.stepNumber {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  border-radius: 50%;
+  background: #17212b;
+  color: white;
+  font-weight: 700;
+}
+
+.step strong {
+  display: block;
+  margin: 4px 0 4px;
+}
+
+.step p {
+  margin: 0;
+  color: #4a5865;
+  line-height: 1.5;
+}
+
+label { display: block; font-weight: 700; margin: 20px 0 8px; }
 textarea {
   width: 100%;
   resize: vertical;
@@ -38,7 +76,31 @@ textarea {
   border-radius: 8px;
   padding: 12px;
 }
-.actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 14px; }
+
+.actionGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.actionOption {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.actionOption button {
+  width: 100%;
+}
+
+.actionOption p {
+  margin: 0;
+  color: #5c6874;
+  font-size: .92rem;
+  line-height: 1.45;
+}
+
 button {
   border: 0;
   border-radius: 8px;
@@ -46,7 +108,9 @@ button {
   background: #17212b;
   color: white;
   cursor: pointer;
+  font-weight: 600;
 }
+
 button.secondary { background: #e8edf1; color: #17212b; }
 button:disabled { opacity: .6; cursor: wait; }
 .error { color: #a51d1d; font-weight: 700; }
@@ -62,3 +126,8 @@ button:disabled { opacity: .6; cursor: wait; }
 .metricGrid span { color: #5c6874; font-size: .9rem; }
 
 li { margin: 8px 0; line-height: 1.5; }
+
+@media (max-width: 700px) {
+  .container { padding-top: 32px; }
+  .actionGrid { grid-template-columns: 1fr; }
+}
