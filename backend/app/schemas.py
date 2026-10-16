@@ -7,6 +7,10 @@ class IncidentRequest(BaseModel):
     time_window_minutes: int = Field(default=5, ge=1, le=60)
 
 
+class EvaluationRequest(BaseModel):
+    latency_seconds: float = Field(default=4.0, gt=0, le=60)
+
+
 class Evidence(BaseModel):
     id: str
     source: str
