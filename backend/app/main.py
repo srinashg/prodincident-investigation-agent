@@ -3,7 +3,12 @@ import os
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.schemas import EvaluationResult, IncidentReport, IncidentRequest
+from app.schemas import (
+    EvaluationRequest,
+    EvaluationResult,
+    IncidentReport,
+    IncidentRequest,
+)
 from app.services.evaluation import EvaluationService
 from app.services.investigation import InvestigationService
 from app.tools.changes import RecentChangeTool
@@ -57,8 +62,10 @@ async def investigate(request: IncidentRequest) -> IncidentReport:
 
 
 @app.post("/api/evaluations/high-latency", response_model=EvaluationResult)
-async def evaluate_high_latency() -> EvaluationResult:
+async def evaluate_high_latency(request: EvaluationRequest) -> EvaluationResult:
     try:
-        return await evaluation_service.evaluate_high_latency()
+        return await evaluation_service.evaluate_high_latency(
+            latency_seconds=request.latency_seconds
+        )
     except ToolUnavailableError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
