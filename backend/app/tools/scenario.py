@@ -4,6 +4,8 @@ import httpx
 
 from app.tools.common import ToolUnavailableError
 
+REQUEST_TIMEOUT_SECONDS = 70.0
+
 
 class ScenarioTool:
     """Developer/test-only tool used by the evaluation harness."""
@@ -13,7 +15,7 @@ class ScenarioTool:
 
     async def seed_high_latency(self, latency_seconds: float) -> dict[str, object]:
         try:
-            timeout = httpx.Timeout(70.0)
+            timeout = httpx.Timeout(REQUEST_TIMEOUT_SECONDS)
             async with httpx.AsyncClient(timeout=timeout) as client:
                 config_response = await client.post(
                     f"{self.simulator_base_url}/api/scenarios/high-latency/seed",
@@ -42,7 +44,28 @@ class ScenarioTool:
                     result["duration_ms"] for result in results
                 ]
                 return scenario
-        except httpx.HTTPError as exc:
+
+        except httpx.TimeoutException as exc:
             raise ToolUnavailableError(
-                "The high-latency evaluation scenario could not be generated."
+                "The high-latency evaluation scenario could not be generated. "
+                f"Reason: one or more simulator requests exceeded the "
+                f"{REQUEST_TIMEOUT_SECONDS:g}-second HTTP timeout."
+            ) from exc
+        except httpx.ConnectError as exc:
+            raise ToolUnavailableError(
+                "The high-latency evaluation scenario could not be generated. "
+                f"Reason: the simulator could not be reached at "
+                f"{self.simulator_base_url}. Make sure the simulator is running."
+            ) from exc
+        except httpx.HTTPStatusError as exc:
+            raise ToolUnavailableError(
+                "The high-latency evaluation scenario could not be generated. "
+                f"Reason: the simulator returned HTTP "
+                f"{exc.response.status_code} for {exc.request.url.path}."
+            ) from exc
+        except httpx.RequestError as exc:
+            raise ToolUnavailableError(
+                "The high-latency evaluation scenario could not be generated. "
+                f"Reason: the request to the simulator failed "
+                f"({exc.__class__.__name__})."
             ) from exc
