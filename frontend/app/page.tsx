@@ -46,6 +46,7 @@ async function readJson(response: Response) {
 
 export default function Home() {
   const [symptom, setSymptom] = useState("Checkout latency increased to about 4 seconds");
+  const [simulatedLatencySeconds, setSimulatedLatencySeconds] = useState(4);
   const [report, setReport] = useState<IncidentReport | null>(null);
   const [evaluation, setEvaluation] = useState<EvaluationResult | null>(null);
   const [error, setError] = useState("");
@@ -82,10 +83,15 @@ export default function Home() {
     try {
       const response = await fetch(`${API_BASE_URL}/api/evaluations/high-latency`, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          latency_seconds: simulatedLatencySeconds,
+        }),
       });
       const result = (await readJson(response)) as EvaluationResult;
       setEvaluation(result);
       setReport(result.report);
+      setSymptom(result.report.symptom);
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : "Request failed");
     } finally {
@@ -158,17 +164,32 @@ export default function Home() {
             </div>
 
             <div className="actionOption">
+              <label className="inlineLabel" htmlFor="simulated-latency">
+                Simulated checkout latency (seconds)
+              </label>
+              <input
+                id="simulated-latency"
+                type="number"
+                min="0.1"
+                max="60"
+                step="0.1"
+                value={simulatedLatencySeconds}
+                onChange={(event) =>
+                  setSimulatedLatencySeconds(Number(event.target.value))
+                }
+              />
               <button
-                disabled={loading}
+                disabled={loading || simulatedLatencySeconds <= 0 || simulatedLatencySeconds > 60}
                 type="button"
                 className="secondary"
                 onClick={evaluateKnownScenario}
               >
-                Evaluate known high-latency scenario
+                Run simulated latency scenario
               </button>
               <p>
-                Load the built-in ~4 second latency incident, run the investigation, and verify
-                whether the expected cause and evidence are found.
+                Choose a latency in seconds. The simulator converts it to milliseconds,
+                generates matching telemetry and a recent configuration change, then runs
+                the investigation against that evidence.
               </p>
             </div>
           </div>
@@ -181,7 +202,7 @@ export default function Home() {
         <section className="card">
           <h2>Evaluation</h2>
           <p className="sectionHelp">
-            This checks the investigation against the known answer for the built-in test scenario.
+            This checks the investigation against the known answer for the simulated scenario.
           </p>
           <div className="metricGrid">
             <div><strong>{evaluation.passed ? "PASS" : "FAIL"}</strong><span>Overall</span></div>
