@@ -93,6 +93,9 @@ async def configure_high_latency(
 @app.get("/api/telemetry/checkout")
 async def checkout_telemetry() -> dict[str, object]:
     latencies = [event.latency_ms for event in state.events]
+    dependency_latencies = [
+        event.dependency_duration_ms for event in state.events
+    ]
     errors = [event for event in state.events if event.status_code >= 500]
     request_count = len(state.events)
 
@@ -106,6 +109,7 @@ async def checkout_telemetry() -> dict[str, object]:
             sum(latencies) / request_count if request_count else 0.0
         ),
         "p95_latency_ms": calculate_p95(latencies),
+        "dependency_p95_latency_ms": calculate_p95(dependency_latencies),
         "events": [event.__dict__ for event in state.events[-25:]],
     }
 
