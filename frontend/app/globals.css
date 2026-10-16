@@ -6,7 +6,7 @@
 
 * { box-sizing: border-box; }
 body { margin: 0; }
-button, textarea { font: inherit; }
+button, textarea, input { font: inherit; }
 
 .container {
   width: min(920px, calc(100% - 32px));
@@ -69,12 +69,18 @@ h3 { margin-top: 28px; }
 }
 
 label { display: block; font-weight: 700; margin: 20px 0 8px; }
-textarea {
+.inlineLabel { margin: 0; }
+
+textarea,
+input[type="number"] {
   width: 100%;
-  resize: vertical;
   border: 1px solid #aeb8c2;
   border-radius: 8px;
   padding: 12px;
+}
+
+textarea {
+  resize: vertical;
 }
 
 .actionGrid {
