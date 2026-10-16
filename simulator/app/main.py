@@ -14,6 +14,10 @@ class CheckoutRequest(BaseModel):
     scenario: str | None = None
 
 
+class HighLatencyScenarioRequest(BaseModel):
+    latency_seconds: float = Field(default=4.0, gt=0, le=60)
+
+
 @app.get("/health")
 async def health() -> dict[str, str]:
     return {"status": "ok"}
@@ -40,14 +44,18 @@ async def checkout(request: CheckoutRequest) -> dict[str, str | int]:
 
 
 @app.post("/api/scenarios/high-latency/seed")
-async def seed_high_latency() -> dict[str, str | int]:
-    """Seed deterministic telemetry without forcing tests to wait for 20 real 4-second calls."""
+async def seed_high_latency(
+    request: HighLatencyScenarioRequest,
+) -> dict[str, str | int | float]:
+    """Seed deterministic high-latency telemetry using a caller-selected delay."""
     state.reset()
+
+    delay_ms = int(round(request.latency_seconds * 1000))
 
     for _ in range(20):
         state.events.append(
             TelemetryEvent(
-                latency_ms=4000.0,
+                latency_ms=float(delay_ms),
                 status_code=200,
                 timestamp=utc_now(),
             )
@@ -57,11 +65,22 @@ async def seed_high_latency() -> dict[str, str | int]:
         {
             "timestamp": utc_now(),
             "type": "configuration",
-            "summary": "CHECKOUT_PROCESSING_DELAY_MS changed from 50 to 4000.",
+            "field": "CHECKOUT_PROCESSING_DELAY_MS",
+            "previous_value_ms": 50,
+            "new_value_ms": delay_ms,
+            "summary": (
+                "CHECKOUT_PROCESSING_DELAY_MS changed "
+                f"from 50 to {delay_ms}."
+            ),
         }
     )
 
-    return {"scenario": "checkout-high-latency-v1", "seeded_requests": 20}
+    return {
+        "scenario": "checkout-high-latency-v1",
+        "seeded_requests": 20,
+        "latency_seconds": request.latency_seconds,
+        "latency_ms": delay_ms,
+    }
 
 
 @app.get("/api/telemetry/checkout")
