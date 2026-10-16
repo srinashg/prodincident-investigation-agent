@@ -52,11 +52,16 @@ export default function Home() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  function clearPreviousResults() {
+    setReport(null);
+    setEvaluation(null);
+    setError("");
+  }
+
   async function submitInvestigation(event: FormEvent) {
     event.preventDefault();
+    clearPreviousResults();
     setLoading(true);
-    setError("");
-    setEvaluation(null);
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/investigations`, {
@@ -77,8 +82,8 @@ export default function Home() {
   }
 
   async function evaluateKnownScenario() {
+    clearPreviousResults();
     setLoading(true);
-    setError("");
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/evaluations/high-latency`, {
@@ -148,7 +153,10 @@ export default function Home() {
           <textarea
             id="symptom"
             value={symptom}
-            onChange={(event) => setSymptom(event.target.value)}
+            onChange={(event) => {
+              setSymptom(event.target.value);
+              clearPreviousResults();
+            }}
             rows={3}
             placeholder="Example: Checkout requests are taking about 4 seconds"
           />
@@ -174,9 +182,10 @@ export default function Home() {
                 max="60"
                 step="0.1"
                 value={simulatedLatencySeconds}
-                onChange={(event) =>
-                  setSimulatedLatencySeconds(Number(event.target.value))
-                }
+                onChange={(event) => {
+                  setSimulatedLatencySeconds(Number(event.target.value));
+                  clearPreviousResults();
+                }}
               />
               <button
                 disabled={loading || simulatedLatencySeconds <= 0 || simulatedLatencySeconds > 60}
