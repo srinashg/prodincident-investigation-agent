@@ -8,16 +8,21 @@ class TelemetryEvent:
     latency_ms: float
     status_code: int
     timestamp: str
+    endpoint: str
+    dependency: str
+    dependency_duration_ms: float
 
 
 @dataclass
 class SimulatorState:
     events: list[TelemetryEvent] = field(default_factory=list)
-    changes: list[dict[str, str]] = field(default_factory=list)
+    changes: list[dict[str, object]] = field(default_factory=list)
+    processing_delay_ms: int = 50
 
     def reset(self) -> None:
         self.events.clear()
         self.changes.clear()
+        self.processing_delay_ms = 50
 
 
 state = SimulatorState()
