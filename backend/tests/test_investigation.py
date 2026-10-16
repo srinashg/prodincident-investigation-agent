@@ -9,7 +9,7 @@ class FakeTelemetryTool:
         return {
             "request_count": 20,
             "error_rate_percent": 0.0,
-            "p95_latency_ms": 4000.0,
+            "p95_latency_ms": 6500.0,
         }
 
 
@@ -17,7 +17,10 @@ class FakeRecentChangeTool:
     async def get_recent_changes(self):
         return [
             {
-                "summary": "CHECKOUT_PROCESSING_DELAY_MS changed from 50 to 4000."
+                "field": "CHECKOUT_PROCESSING_DELAY_MS",
+                "previous_value_ms": 50,
+                "new_value_ms": 6500,
+                "summary": "CHECKOUT_PROCESSING_DELAY_MS changed from 50 to 6500.",
             }
         ]
 
@@ -33,7 +36,7 @@ class FakeKnowledgeTool:
 
 
 @pytest.mark.asyncio
-async def test_high_latency_investigation_is_evidence_backed():
+async def test_high_latency_investigation_uses_change_evidence():
     service = InvestigationService(
         telemetry_tool=FakeTelemetryTool(),
         recent_change_tool=FakeRecentChangeTool(),
@@ -41,11 +44,11 @@ async def test_high_latency_investigation_is_evidence_backed():
     )
 
     report = await service.investigate(
-        IncidentRequest(symptom="Checkout latency increased to 4 seconds")
+        IncidentRequest(symptom="Checkout latency increased to 6.5 seconds")
     )
 
     assert report.confidence == 0.95
-    assert "4000 ms" in report.likely_cause
+    assert "6500 ms" in report.likely_cause
     assert {item.source for item in report.evidence} >= {
         "local telemetry",
         "recent changes",
