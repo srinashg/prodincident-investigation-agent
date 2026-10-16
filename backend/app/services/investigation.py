@@ -30,7 +30,7 @@ class InvestigationService:
             ToolStep(
                 tool="telemetry",
                 status="success",
-                detail="Retrieved local checkout logs and latency/error metrics.",
+                detail="Retrieved measured checkout and dependency latency telemetry.",
             )
         )
         evidence.append(
@@ -38,8 +38,10 @@ class InvestigationService:
                 id="telemetry-1",
                 source="local telemetry",
                 summary=(
-                    f"Across {telemetry['request_count']} checkout requests, "
-                    f"p95 latency is {telemetry['p95_latency_ms']:.0f} ms and "
+                    f"Across {telemetry['request_count']} real checkout requests, "
+                    f"checkout p95 latency is {telemetry['p95_latency_ms']:.0f} ms, "
+                    f"payment dependency p95 latency is "
+                    f"{telemetry.get('dependency_p95_latency_ms', 0):.0f} ms, and "
                     f"the error rate is {telemetry['error_rate_percent']:.1f}%."
                 ),
             )
