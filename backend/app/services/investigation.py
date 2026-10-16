@@ -5,6 +5,8 @@ from app.tools.changes import RecentChangeTool
 from app.tools.knowledge import KnowledgeTool
 from app.tools.telemetry import TelemetryTool
 
+HIGH_LATENCY_THRESHOLD_MS = 3000
+
 
 class InvestigationService:
     """Deterministic local orchestrator that will later be replaced by the AI agent."""
@@ -81,7 +83,8 @@ class InvestigationService:
         processing_delay_ms = self._find_processing_delay_change(changes)
 
         if (
-            processing_delay_ms is not None
+            p95_latency_ms >= HIGH_LATENCY_THRESHOLD_MS
+            and processing_delay_ms is not None
             and p95_latency_ms >= processing_delay_ms * 0.8
         ):
             likely_cause = (
@@ -94,7 +97,7 @@ class InvestigationService:
                 "Repeat checkout requests and confirm p95 latency returns below the normal threshold.",
                 "Verify no downstream dependency or database latency remains elevated.",
             ]
-        elif p95_latency_ms >= 3000:
+        elif p95_latency_ms >= HIGH_LATENCY_THRESHOLD_MS:
             likely_cause = (
                 "Checkout requests have sustained high latency, but the available evidence "
                 "does not yet identify one specific configuration or dependency as the cause."
