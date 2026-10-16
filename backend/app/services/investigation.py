@@ -78,12 +78,15 @@ class InvestigationService:
             )
 
         p95_latency_ms = float(telemetry["p95_latency_ms"])
-        change_summaries = " ".join(change["summary"] for change in changes).lower()
+        processing_delay_ms = self._find_processing_delay_change(changes)
 
-        if p95_latency_ms >= 3000 and "4000" in change_summaries:
+        if (
+            processing_delay_ms is not None
+            and p95_latency_ms >= processing_delay_ms * 0.8
+        ):
             likely_cause = (
-                "The checkout processing delay was changed to 4000 ms, which is causing "
-                "the sustained high checkout latency."
+                f"The checkout processing delay was changed to {processing_delay_ms} ms, "
+                "which is causing the sustained high checkout latency."
             )
             confidence = 0.95
             next_checks = [
@@ -120,3 +123,13 @@ class InvestigationService:
             tool_timeline=timeline,
             recommended_next_checks=next_checks,
         )
+
+    @staticmethod
+    def _find_processing_delay_change(changes: list[dict]) -> int | None:
+        """Read the configured delay from structured recent-change evidence."""
+        for change in changes:
+            if change.get("field") == "CHECKOUT_PROCESSING_DELAY_MS":
+                value = change.get("new_value_ms")
+                if isinstance(value, (int, float)):
+                    return int(value)
+        return None
